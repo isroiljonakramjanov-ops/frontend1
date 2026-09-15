@@ -27,7 +27,7 @@ export default function LiveMonitor() {
     const socketHost = `${window.location.protocol}//${window.location.hostname}:3000`;
     const socket = io(socketHost);
 
-    socket.on('connect', () => {
+    socket.on('connect', () => {  
       setSocketStatus('Ulangan');
       socket.emit('join_monitor');
     });

@@ -1,22 +1,30 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, AlertTriangle, Edit2, Clock, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Search, Edit2, Clock, RefreshCw, Calendar } from 'lucide-react';
 import api, { getImageUrl } from '../services/api';
 
 export default function Attendance() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('daily'); // 'daily' | 'monthly'
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchLogs();
-  }, [date]);
+  }, [date, viewMode, selectedMonth]);
 
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/attendance?date=${date}`);
-      setLogs(res.data);
+      let url = `/attendance?date=${date}`;
+      if (viewMode === 'monthly') {
+        const [year, month] = selectedMonth.split('-');
+        const lastDay = new Date(year, month, 0).getDate();
+        url = `/attendance?start_date=${selectedMonth}-01&end_date=${selectedMonth}-${lastDay}`;
+      }
+      const res = await api.get(url);
+      setLogs(res.data || []);
     } catch (err) {
       console.error('Davomat ma\'lumotlarini olishda xatolik:', err);
     } finally {
@@ -30,7 +38,8 @@ export default function Attendance() {
     if (!newTime) return;
 
     const [hh, mm, ss] = newTime.split(':');
-    const newOutDate = new Date(`${date}T${hh || '18'}:${mm || '00'}:${ss || '00'}`);
+    const targetDate = date;
+    const newOutDate = new Date(`${targetDate}T${hh || '18'}:${mm || '00'}:${ss || '00'}`);
 
     const reason = prompt("Tahrirlash sababini kiriting:", "Turniketda qayd etilmagan / qo'lda tuzatish");
     if (!reason) return;
@@ -46,7 +55,6 @@ export default function Attendance() {
     }
   };
 
-  // Format timestamp explicitly as HH:MM:SS
   const formatTimeSeconds = (dateStr) => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
@@ -56,7 +64,12 @@ export default function Attendance() {
     return `${hh}:${mm}:${ss}`;
   };
 
-  // Format worked hours into human readable text (e.g. 0.02 soat (1 daq 9 sek))
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('uz-UZ', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  };
+
   const formatWorkedHours = (checkIn, checkOut, hoursNum) => {
     if (!checkIn || !checkOut) return '0 soat';
     const diffMs = new Date(checkOut) - new Date(checkIn);
@@ -65,14 +78,12 @@ export default function Attendance() {
     const totalSecs = Math.floor(diffMs / 1000);
     const h = Math.floor(totalSecs / 3600);
     const m = Math.floor((totalSecs % 3600) / 60);
-    const s = totalSecs % 60;
 
     let timeText = '';
     if (h > 0) timeText += `${h} soat `;
-    if (m > 0) timeText += `${m} daq `;
-    if (s > 0 || (h === 0 && m === 0)) timeText += `${s} sek`;
+    if (m > 0) timeText += `${m} daq`;
 
-    return `${hoursNum || (diffMs/(1000*3600)).toFixed(2)} soat (${timeText.trim()})`;
+    return timeText.trim() || '1 daqiqadan kam';
   };
 
   const filteredLogs = logs.filter(log => 
@@ -83,18 +94,46 @@ export default function Attendance() {
   return (
     <div className="page-container">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="page-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Clock size={30} color="var(--accent-primary)" />
             Davomat Jurnali va Hisoboti
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-            Kunlik real keldi-ketdi yozuvlari (soat:minut:sekund), kechikish va ishlangan soatlar hisobi.
+            {viewMode === 'monthly' ? '1 Oylik to\'liq keldi-ketdi jurnali rasmlari bilan' : 'Kunlik real keldi-ketdi yozuvlari'}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* View Mode Toggle */}
+          <div style={{ display: 'flex', background: 'rgba(15,23,42,0.6)', borderRadius: '10px', padding: '4px', border: '1px solid var(--border-color)' }}>
+            <button
+              onClick={() => setViewMode('daily')}
+              style={{
+                padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                fontWeight: '600', fontSize: '0.85rem',
+                background: viewMode === 'daily' ? 'var(--accent-primary)' : 'transparent',
+                color: viewMode === 'daily' ? '#fff' : 'var(--text-secondary)',
+                transition: 'all 0.2s'
+              }}
+            >
+              📅 Kunlik
+            </button>
+            <button
+              onClick={() => setViewMode('monthly')}
+              style={{
+                padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                fontWeight: '600', fontSize: '0.85rem',
+                background: viewMode === 'monthly' ? 'var(--accent-primary)' : 'transparent',
+                color: viewMode === 'monthly' ? '#fff' : 'var(--text-secondary)',
+                transition: 'all 0.2s'
+              }}
+            >
+              🗓 1 Oylik to'liq
+            </button>
+          </div>
+
           <button 
             onClick={fetchLogs}
             className="btn"
@@ -103,18 +142,27 @@ export default function Attendance() {
             <RefreshCw size={16} /> Yangilash
           </button>
           
-          <input 
-            type="date" 
-            value={date} 
-            onChange={(e) => setDate(e.target.value)}
-            style={{ padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
-          />
+          {viewMode === 'daily' ? (
+            <input 
+              type="date" 
+              value={date} 
+              onChange={(e) => setDate(e.target.value)}
+              style={{ padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
+            />
+          ) : (
+            <input 
+              type="month" 
+              value={selectedMonth} 
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              style={{ padding: '0.6rem 0.8rem', fontSize: '0.9rem' }}
+            />
+          )}
         </div>
       </div>
 
       <div className="glass-panel" style={{ padding: '1.5rem' }}>
-        {/* Search Bar */}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
+        {/* Search Bar & Summary */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
             <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
             <input 
@@ -125,6 +173,9 @@ export default function Attendance() {
               style={{ width: '100%', paddingLeft: '2.75rem' }}
             />
           </div>
+          <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '600' }}>
+            Jami yozuvlar: <strong style={{ color: 'var(--accent-primary)' }}>{filteredLogs.length} ta</strong>
+          </div>
         </div>
 
         {loading ? (
@@ -134,11 +185,11 @@ export default function Attendance() {
             <table>
               <thead>
                 <tr>
+                  {viewMode === 'monthly' && <th>Sana</th>}
                   <th>Hodim</th>
                   <th>Kelgan vaqti (HH:MM:SS)</th>
                   <th>Ketgan vaqti (HH:MM:SS)</th>
-                  <th>Kechikish</th>
-                  <th>Ishlangan soat</th>
+                  <th>Ishlangan vaqt</th>
                   <th>Holati</th>
                   <th>Amallar</th>
                 </tr>
@@ -146,63 +197,56 @@ export default function Attendance() {
               <tbody>
                 {filteredLogs.map(log => (
                   <tr key={log.id} style={{ background: log.is_manual_override ? 'rgba(245, 158, 11, 0.04)' : 'transparent' }}>
+                    {viewMode === 'monthly' && (
+                      <td style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>
+                        {formatDate(log.check_in)}
+                      </td>
+                    )}
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                        <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '2px solid var(--accent-primary)', flexShrink: 0 }}>
                           {log.user?.avatar_url ? (
                             <img src={getImageUrl(log.user.avatar_url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
-                            <span style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{log.user?.full_name?.charAt(0) || 'H'}</span>
+                            <span style={{ fontWeight: 'bold', fontSize: '1rem', color: 'var(--accent-primary)' }}>{log.user?.full_name?.charAt(0) || 'H'}</span>
                           )}
                         </div>
                         <div>
-                          <div style={{ fontWeight: '600' }}>{log.user?.full_name || 'Noma\'lum'}</div>
+                          <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{log.user?.full_name || 'Noma\'lum'}</div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{log.user?.department || 'Bo\'limsiz'}</div>
                         </div>
                       </div>
                     </td>
                     <td>
                       <div style={{ fontWeight: '700', color: 'var(--success)', fontFamily: 'monospace', fontSize: '1.05rem' }}>
-                        {formatTimeSeconds(log.check_in)}
+                        📥 {formatTimeSeconds(log.check_in)}
                       </div>
                     </td>
                     <td>
                       {log.check_out ? (
                         <div style={{ fontWeight: '700', color: '#60a5fa', fontFamily: 'monospace', fontSize: '1.05rem' }}>
-                          {formatTimeSeconds(log.check_out)}
+                          📤 {formatTimeSeconds(log.check_out)}
                         </div>
                       ) : (
-                        <span className="badge danger" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <AlertTriangle size={12} /> Bino ichida (Ketmagan)
-                        </span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Hali ketmadi</span>
                       )}
                     </td>
                     <td>
-                      {log.late_minutes > 0 ? (
-                        <span style={{ color: 'var(--danger)', fontWeight: '600' }}>{log.late_minutes} daq.</span>
-                      ) : (
-                        <span style={{ color: 'var(--success)', fontWeight: '500' }}>0 daq. (O'z vaqtida)</span>
-                      )}
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>
+                      <div style={{ fontWeight: '600', fontSize: '0.85rem' }}>
                         {formatWorkedHours(log.check_in, log.check_out, log.worked_hours)}
                       </div>
-                      {log.overtime_hours > 0 && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)' }}>+{log.overtime_hours} (overtime)</div>
-                      )}
                     </td>
                     <td>
-                      {log.is_manual_override ? (
-                        <span className="badge warning" title={log.override_reason}>Qo'lda tahrirlangan</span>
+                      {log.check_out ? (
+                        <span className="badge success">✅ Yakunlangan</span>
                       ) : (
-                        <span className="badge success">Turniket (Avto)</span>
+                        <span className="badge warning">⏳ Ishda</span>
                       )}
                     </td>
                     <td>
-                      <button 
+                      <button
                         onClick={() => handleManualOverride(log.id, log.check_out)}
-                        style={{ padding: '0.5rem', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
                         title="Tahrirlash"
                       >
                         <Edit2 size={16} />
@@ -210,13 +254,6 @@ export default function Attendance() {
                     </td>
                   </tr>
                 ))}
-                {filteredLogs.length === 0 && (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                      Ushbu sanada davomat yozuvlari topilmadi
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
