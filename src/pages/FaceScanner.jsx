@@ -12,9 +12,8 @@ const MODELS_URL = '/models';
 // face-api.js standard: distance < 0.40 is same person, > 0.40 is DIFFERENT person
 const MATCH_DISTANCE_THRESHOLD = 0.40;
 
-// Default ish vaqti: kirish 07:40, chiqish 17:00
-const DEFAULT_WORK_START = '07:40';
-const DEFAULT_WORK_END = '17:00';
+// Default ish boshlanish vaqti: 07:00
+const DEFAULT_WORK_START = '07:00';
 
 export default function FaceScanner({ standalone = false }) {
   const videoRef = useRef(null);
@@ -446,7 +445,7 @@ export default function FaceScanner({ standalone = false }) {
                 TURNIKET — Face-ID Terminal
               </div>
               <div style={{ fontSize: '0.78rem', color: 'rgba(148,163,184,0.8)' }}>
-                SSD-Mobilenet AI • Ish vaqti: {DEFAULT_WORK_START} – {DEFAULT_WORK_END}
+                SSD-Mobilenet AI • Ish boshlanishi: {DEFAULT_WORK_START}
               </div>
             </div>
           </div>
@@ -545,7 +544,6 @@ export default function FaceScanner({ standalone = false }) {
             {/* Work hours info */}
             <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'rgba(148,163,184,0.6)', display: 'flex', gap: '1.5rem' }}>
               <span>🕐 Ish boshlanishi: <strong style={{ color: '#60a5fa' }}>{DEFAULT_WORK_START}</strong></span>
-              <span>🕔 Ish tugashi: <strong style={{ color: '#60a5fa' }}>{DEFAULT_WORK_END}</strong></span>
               <span>⚠️ Kechiksa: <strong style={{ color: '#fbbf24' }}>Kech qoldi deb belgilanadi</strong></span>
             </div>
           </div>

@@ -28,6 +28,7 @@ export default function Layout({ children }) {
     { path: '/night-shifts', label: 'Tungi Dijurantlar', icon: <Moon size={20} /> },
     { path: '/monitor', label: 'Live Monitor', icon: <Activity size={20} /> },
     { path: '/attendance', label: 'Davomat', icon: <Clock size={20} /> },
+    { path: '/face-terminal', label: 'Turniket / Skaner', icon: <ScanFace size={20} /> },
   ];
 
   return (

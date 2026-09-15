@@ -32,7 +32,6 @@ function App() {
           <Route path="/night-shifts" element={<ProtectedRoute><NightShifts /></ProtectedRoute>} />
           <Route path="/monitor" element={<ProtectedRoute><LiveMonitor /></ProtectedRoute>} />
           <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
-          <Route path="/payroll" element={<ProtectedRoute><Payroll /></ProtectedRoute>} />
           <Route path="/face-terminal" element={<FaceScanner standalone />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
