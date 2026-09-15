@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, AlertTriangle, Edit2, Clock, CheckCircle2, RefreshCw } from 'lucide-react';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 
 export default function Attendance() {
   const [logs, setLogs] = useState([]);
@@ -150,7 +150,7 @@ export default function Attendance() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
                           {log.user?.avatar_url ? (
-                            <img src={`http://localhost:3000${log.user.avatar_url}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={getImageUrl(log.user.avatar_url)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
                             <span style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{log.user?.full_name?.charAt(0) || 'H'}</span>
                           )}

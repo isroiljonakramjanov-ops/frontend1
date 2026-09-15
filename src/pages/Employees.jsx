@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Plus, Edit2, Trash2, X, Camera, DollarSign, CalendarCheck } from 'lucide-react';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 
 export default function Employees() {
   const [employees, setEmployees] = useState([]);
@@ -48,7 +48,7 @@ export default function Employees() {
         penalty_per_minute: employee.penalty_per_minute || 0,
         overtime_coefficient: employee.overtime_coefficient || 1.5,
       });
-      setAvatarPreview(employee.avatar_url ? `http://localhost:3000${employee.avatar_url}` : null);
+      setAvatarPreview(getImageUrl(employee.avatar_url));
     } else {
       setEditEmployee(null);
       setFormData({
@@ -175,7 +175,7 @@ export default function Employees() {
                           border: '2px solid var(--glass-border)'
                         }}>
                           {emp.avatar_url ? (
-                            <img src={`http://localhost:3000${emp.avatar_url}`} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={getImageUrl(emp.avatar_url)} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           ) : (
                             <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{emp.full_name.charAt(0)}</span>
                           )}

@@ -23,4 +23,12 @@ api.interceptors.response.use(
   }
 );
 
+export const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ohqh.onrender.com/api').replace('/api', '');
+
+export const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http') || url.startsWith('data:')) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 export default api;

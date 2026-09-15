@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { Activity, UserCheck, UserX, Clock, RefreshCw } from 'lucide-react';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 
 export default function LiveMonitor() {
   const [events, setEvents] = useState([]);
@@ -137,7 +137,7 @@ export default function LiveMonitor() {
                   flexShrink: 0, border: '2px solid var(--glass-border)'
                 }}>
                   {emp.avatar_url ? (
-                    <img src={`http://localhost:3000${emp.avatar_url}`} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={getImageUrl(emp.avatar_url)} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     emp.full_name?.charAt(0) || 'H'
                   )}

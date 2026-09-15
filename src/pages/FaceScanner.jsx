@@ -634,7 +634,7 @@ export default function FaceScanner({ standalone = false }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <div style={{ width: 38, height: 38, borderRadius: '50%', overflow: 'hidden', background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: '#60a5fa', fontSize: '0.85rem', flexShrink: 0 }}>
                         {hasAvatar
-                          ? <img src={emp.avatar_url.startsWith('http') || emp.avatar_url.startsWith('data:') ? emp.avatar_url : `http://localhost:3000${emp.avatar_url}`} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ? <img src={emp.avatar_url.startsWith('http') || emp.avatar_url.startsWith('data:') ? emp.avatar_url : `${BACKEND_URL}${emp.avatar_url}`} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           : emp.full_name.substring(0, 2).toUpperCase()
                         }
                       </div>
@@ -936,7 +936,7 @@ export default function FaceScanner({ standalone = false }) {
                         }}>
                           {hasAvatar ? (
                             <img
-                              src={emp.avatar_url.startsWith('http') || emp.avatar_url.startsWith('data:') ? emp.avatar_url : `http://localhost:3000${emp.avatar_url}`}
+                              src={emp.avatar_url.startsWith('http') || emp.avatar_url.startsWith('data:') ? emp.avatar_url : `${BACKEND_URL}${emp.avatar_url}`}
                               alt={emp.full_name}
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />

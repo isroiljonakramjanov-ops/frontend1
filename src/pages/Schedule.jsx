@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Trash2, X, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 
 const SHIFT_TYPES = [
   { value: 'day', label: '☀️ Ertalabki', start: '09:00', end: '18:00', color: 'var(--success)', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.4)' },
@@ -168,7 +168,7 @@ export default function Schedule() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                         <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: '700', flexShrink: 0, overflow: 'hidden' }}>
                           {emp.avatar_url
-                            ? <img src={`http://localhost:3000${emp.avatar_url}`} style={{ width:'100%', height:'100%', objectFit:'cover' }} alt="" />
+                            ? <img src={getImageUrl(emp.avatar_url)} style={{ width:'100%', height:'100%', objectFit:'cover' }} alt="" />
                             : emp.full_name.charAt(0)}
                         </div>
                         <div>

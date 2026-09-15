@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Moon, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Phone, ShieldCheck, UserCheck, Clock, UserX } from 'lucide-react';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 
 export default function NightShifts() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -193,7 +193,7 @@ export default function NightShifts() {
                       flexShrink: 0
                     }}>
                       {emp.avatar_url ? (
-                        <img src={`http://localhost:3000${emp.avatar_url}`} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={getImageUrl(emp.avatar_url)} alt={emp.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
                         <span style={{ fontWeight: 'bold', fontSize: '1.25rem' }}>{emp.full_name?.charAt(0) || 'U'}</span>
                       )}
