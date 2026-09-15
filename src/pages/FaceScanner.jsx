@@ -14,6 +14,7 @@ const MATCH_DISTANCE_THRESHOLD = 0.40;
 
 // Default ish boshlanish vaqti: 07:00
 const DEFAULT_WORK_START = '07:00';
+const BACKEND_URL = (import.meta.env.VITE_API_URL || 'https://backend-ohqh.onrender.com/api').replace('/api', '');
 
 export default function FaceScanner({ standalone = false }) {
   const videoRef = useRef(null);
@@ -79,6 +80,13 @@ export default function FaceScanner({ standalone = false }) {
     if (standalone) setIsKioskMode(true);
     return () => stopCamera();
   }, []);
+
+  // Kamerani video elementga ulash (qora ekran muammosini tuzatish)
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, cameraActive]);
 
   const loadModels = async () => {
     setModelsLoading(true);
@@ -150,11 +158,10 @@ export default function FaceScanner({ standalone = false }) {
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }
       });
       setStream(mediaStream);
-      if (videoRef.current) videoRef.current.srcObject = mediaStream;
       setCameraActive(true);
     } catch (err) {
       setCameraActive(false);
-      setErrorMsg('Kamera ruxsati berilmadi yoki kamera topilmadi');
+      setErrorMsg('Kamera ruxsati berilmadi yoki kamera topilmadi (Brauzerda kameraga ruxsat bering)');
     }
   };
 
@@ -197,7 +204,7 @@ export default function FaceScanner({ standalone = false }) {
     try {
       const url = emp.avatar_url.startsWith('http') || emp.avatar_url.startsWith('data:')
         ? emp.avatar_url
-        : `http://localhost:3000${emp.avatar_url}`;
+        : `${BACKEND_URL}${emp.avatar_url}`;
 
       const img = await faceapi.fetchImage(url);
 
